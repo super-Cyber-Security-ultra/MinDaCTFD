@@ -20,7 +20,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./CTFd/plugins:/opt/CTFd/CTFd/plugins
     depends_on:
-      - db
+      db:
+        condition: service_started
+      frpc:
+        condition: service_healthy
     networks:
         default:
         internal:
@@ -74,6 +77,12 @@ services:
         frp:
             ipv4_address: 172.1.0.3
         frp_containers:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://172.1.0.3:7400/api/status"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+      start_period: 2s
 
 networks:
     default:
